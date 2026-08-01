@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You 💜</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0710;
+            --card-bg: rgba(20, 14, 30, 0.75);
+            --purple-glow: rgba(147, 51, 234, 0.15);
+            --gold: #d4af37;
+            --gold-light: #f3e5ab;
+            --text-main: #f3f0f7;
+            --text-muted: #b8b2c4;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            transition: background 0.8s ease;
+        }
+
+        .ambient-glow {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at 50% 20%, var(--purple-glow) 0%, transparent 60%);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            width: 100%;
+            max-width: 420px;
+            height: 100vh;
+            max-height: 850px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.6), 0 0 40px rgba(147, 51, 234, 0.1);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 35px 25px;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        @media(min-width: 480px) {
+            .container {
+                border-radius: 28px;
+                height: 88vh;
+            }
+        }
+
+        .slide {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .slide.active {
+            display: flex;
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1, h2 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold-light);
+            font-weight: 600;
+            margin-bottom: 12px;
+            line-height: 1.3;
+        }
+
+        h2 { font-size: 1.5rem; }
+        p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .gold-btn {
+            background: linear-gradient(135deg, #d4af37 0%, #aa7c11 100%);
+            color: #0b0710;
+            border: none;
+            padding: 14px 32px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(212, 175, 55, 0.25);
+            transition: transform 0.2s ease;
+            margin-top: 10px;
+        }
+
+        .gold-btn:active {
+            transform: scale(0.96);
+        }
+
+        .welcome-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .stars-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .star-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(212, 175, 55, 0.2);
+            padding: 14px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+
+        .star-card:hover, .star-card.revealed {
+            background: rgba(212, 175, 55, 0.08);
+            border-color: var(--gold);
+            color: var(--text-main);
+        }
+
+        /* Shayari Box Style */
+        .shayari-box {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+            padding: 22px 18px;
+            width: 100%;
+            margin: 10px 0;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.4);
+        }
+
+        .shayari-box p {
+            font-family: 'Playfair Display', serif;
+            font-style: italic;
+            color: var(--gold-light);
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        /* Quiz / Options Styles */
+        .quiz-container {
+            width: 100%;
+            text-align: left;
+            margin: 5px 0;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .quiz-btn {
+            background: rgba(147, 51, 234, 0.08);
+            border: 1px solid rgba(212, 175, 55, 0.25);
+            padding: 10px 14px;
+            border-radius: 12px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .quiz-btn:hover {
+            background: rgba(212, 175, 55, 0.15);
+            border-color: var(--gold);
+        }
+
+        .quiz-btn.correct {
+            background: rgba(46, 204, 113, 0.2);
+            border-color: #2ecc71;
+            color: #2ecc71;
+        }
+
+        .quiz-btn.wrong {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: #e74c3c;
+            color: #e74c3c;
+        }
+
+        .quiz-feedback {
+            font-size: 0.8rem;
+            color: var(--gold-light);
+            margin-top: 8px;
+            min-height: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .mood-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .mood-btn {
+            background: rgba(147, 51, 234, 0.1);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            padding: 12px;
+            border-radius: 14px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .mood-btn:hover {
+            background: var(--gold);
+            color: #0b0710;
+        }
+
+        .letter-box {
+            background: rgba(15, 10, 25, 0.9);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            border-radius: 20px;
+            padding: 18px;
+            max-height: 360px;
+            overflow-y: auto;
+            text-align: left;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .letter-box p {
+            font-size: 0.85rem;
+            color: #dcd6e8;
+            margin-bottom: 10px;
+        }
+
+        .letter-box::-webkit-scrollbar { width: 4px; }
+        .letter-box::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+
+        .nav-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            cursor: pointer;
+            padding: 6px 12px;
+            transition: color 0.2s;
+        }
+
+        .nav-btn:hover { color: var(--gold); }
+
+        .slide-indicators {
+            display: flex;
+            gap: 5px;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            transition: 0.3s;
+        }
+
+        .dot.active {
+            background: var(--gold);
+            width: 18px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-glow"></div>
+
+    <div class="container">
+        
+        <!-- SLIDE 1 -->
+        <div class="slide active" data-slide="1">
+            <div class="welcome-icon">✨</div>
+            <h1>A Special Vibe</h1>
+            <p>Kuch log din ko aur khubsoorat bana deti hain... Open karke dekho aaj ka vibe kya hai 💜</p>
+            <button class="gold-btn" onclick="nextSlide()">Enter The Vibe</button>
+        </div>
+
+        <!-- SLIDE 2 -->
+        <div class="slide" data-slide="2">
+            <h2>Tap & Reveal</h2>
+            <p>Inhe tap karke dekho andar kya chupa hai 👇</p>
+            <div class="stars-grid">
+                <div class="star-card" onclick="revealCard(this, 'Extremely cute human detected! 🙈')">✨ Star #1</div>
+                <div class="star-card" onclick="revealCard(this, 'Bina baat gussa hone ki expert 😌')">✨ Star #2</div>
+                <div class="star-card" onclick="revealCard(this, 'Jiska hasta hua chehra best hai 💫')">✨ Star #3</div>
+                <div class="star-card" onclick="revealCard(this, 'Meri favourite distraction 💜')">✨ Star #4</div>
+            </div>
+        </div>
+
+        <!-- SLIDE 3 (REPLACED WITH ROMANTIC SHAYARI) -->
+        <div class="slide" data-slide="3">
+            <h2>Dil Ki Baat 💫</h2>
+            <p>Aapke liye ek choti si shayari...</p>
+            <div class="shayari-box">
+                <p>"Tamanna hai meri ki aapki har khushi ka mukammal pata ban jayein, <br>Aap jab bhi muskuraayein, us hasee ki wajah hum ban jayein. 💜"</p>
+            </div>
+            <p style="font-size: 0.8rem; margin-top: 10px; font-style: italic;">Stay just the way you are ✨</p>
+        </div>
+
+        <!-- SLIDE 4 -->
+        <div class="slide" data-slide="4">
+            <h2>Mood Switcher</h2>
+            <p>Select current aesthetic vibe:</p>
+            <div class="mood-grid">
+                <button class="mood-btn" onclick="changeTheme('#0b0710', 'rgba(147, 51, 234, 0.2)')">🌧️ Rainy Night</button>
+                <button class="mood-btn" onclick="changeTheme('#140b07', 'rgba(212, 140, 51, 0.2)')">🌅 Golden Hour</button>
+                <button class="mood-btn" onclick="changeTheme('#070b10', 'rgba(51, 133, 234, 0.2)')">☕ Deep Coffee</button>
+                <button class="mood-btn" onclick="changeTheme('#10070e', 'rgba(234, 51, 161, 0.2)')">✨ Soft Velvet</button>
+            </div>
+        </div>
+
+        <!-- SLIDE 5 (FUNNY QUESTION WITH OPTIONS 1) -->
+        <div class="slide" data-slide="5">
+            <h2>Fun Quiz #1 🧠</h2>
+            <div class="quiz-container">
+                <p>Jab gussa aati hai, toh sabse pehle kya karti ho?</p>
+                <div class="quiz-options">
+                    <button class="quiz-btn" onclick="checkAnswer(this, false, 'Ghalat! Par maan lo yeh sach hai 😂')">A) Phone screen todne ki koshish</button>
+                    <button class="quiz-btn" onclick="checkAnswer(this, true, 'Ekdum Sahi! Bina baat chup chap baith jana 😌')">B) Sabse baat karna band kar dena</button>
+                    <button class="quiz-btn" onclick="checkAnswer(this, false, 'Nhi ji, itni bhi innocent nahi ho! 😜')">C) Shanti se so jana</button>
+                </div>
+                <div class="quiz-feedback" id="feedback1"></div>
+            </div>
+        </div>
+
+        <!-- SLIDE 6 (FUNNY QUESTION WITH OPTIONS 2) -->
+        <div class="slide" data-slide="6">
+            <h2>Fun Quiz #2 🤫</h2>
+            <div class="quiz-container">
+                <p>Raat ko 2 baje tumhara favourite kaam kya hota hai?</p>
+                <div class="quiz-options">
+                    <button class="quiz-btn" onclick="checkAnswer(this, false, 'Socha toh accha tha, par ghalat! 🛑')">A) Padhai karna (Very funny! 📚)</button>
+                    <button class="quiz-btn" onclick="checkAnswer(this, true, 'Correct! Overthinking Pro Max activated! 🌀')">B) Overthinking aur random reels dekhna</button>
+                    <button class="quiz-btn" onclick="checkAnswer(this, false, 'Aisa toh sapne me bhi nahi hota! 😂')">C) Time par sona</button>
+                </div>
+                <div class="quiz-feedback" id="feedback2"></div>
+            </div>
+        </div>
+
+        <!-- SLIDE 7 -->
+        <div class="slide" data-slide="7">
+            <h2>Smile Generator</h2>
+            <p>Ek choti si reminder aapke liye:</p>
+            <h3 style="color: var(--gold-light); font-size: 1.05rem; margin-top: 15px;">"Itna zyada sochna aur overthink karna band karo, warna penalty me extra smiles deni padengi! 😜"</h3>
+        </div>
+
+        <!-- SLIDE 8: THE ROMANTIC LETTER -->
+        <div class="slide" data-slide="8">
+            <h2 style="font-size: 1.2rem; margin-bottom: 6px;">A Note For You 💜</h2>
+            <div class="letter-box">
+                <p>Sach bolun toh... kabhi-kabhi jab main sochta hoon, toh yehi lagta hai ki tumhaari life me kitni hi cheezein chal rahi hoti hain, kitni saari baatein tum apne andar hi daba leti ho.</p>
+                <p>Par ek baat hamesha yaad rakhna—chahe kuch bhi ho jaye, kitni bhi badi problem ho ya tum kitna bhi overthink kar rahi ho... <strong>main hamesha tumhare sath hoon.</strong></p>
+                <p>Tumhe har choti baat par itna zyada sochna band karna padega, kyunki tumhari yeh pyari si smile kisi bhi cheez se zyada important hai. Thoda relax kiya karo, thoda mujh par bhi chhod diya karo.</p>
+                <p>Main bas yeh chahta hoon ki tum hamesha aise hi muskuraati raho, khubsurat lagti raho, kyunki tumhara hasta hua chehra dekh kar mera aadha din toh waise hi ban jata hai.</p>
+                <p>Hamesha aise hi rehna, aur kabhi yeh mat sochna ki tum akeli ho. I'm right here, always. ✨</p>
+            </div>
+        </div>
+
+        <!-- SLIDE 9 -->
+        <div class="slide" data-slide="9">
+            <h2>Next Chapter</h2>
+            <p>Baaki saari baatein milkar karenge... Tab tak ke liye apna dhyan rakho aur khub saari smile karo! ☕✨</p>
+            <button class="gold-btn" onclick="nextSlide()">Final Surprise</button>
+        </div>
+
+        <!-- SLIDE 10 -->
+        <div class="slide" data-slide="10">
+            <div class="welcome-icon">👑</div>
+            <h2>Stay Just The Way You Are</h2>
+            <p style="margin-top: 15px;">You're appreciated and cared for more than you know. 💜✨</p>
+            <button class="gold-btn" onclick="resetSlides()">Replay Vibe</button>
+        </div>
+
+        <!-- Navigation Footer -->
+        <div class="nav-footer">
+            <button class="nav-btn" onclick="prevSlide()">← Back</button>
+            <div class="slide-indicators" id="indicators"></div>
+            <button class="nav-btn" onclick="nextSlide()">Next →</button>
+        </div>
+
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 10;
+
+        function updateSlide() {
+            document.querySelectorAll('.slide').forEach(s => s.classList.remove('active'));
+            document.querySelector(`[data-slide="${currentSlide}"]`).classList.add('active');
+            
+            const indicators = document.getElementById('indicators');
+            indicators.innerHTML = '';
+            for(let i=1; i<=totalSlides; i++) {
+                indicators.innerHTML += `<div class="dot ${i === currentSlide ? 'active' : ''}"></div>`;
+            }
+        }
+
+        function nextSlide() {
+            if(currentSlide < totalSlides) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if(currentSlide > 1) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        function resetSlides() {
+            currentSlide = 1;
+            updateSlide();
+        }
+
+        function revealCard(element, text) {
+            element.innerHTML = text;
+            element.classList.add('revealed');
+        }
+
+        function changeTheme(bgColor, glowColor) {
+            document.body.style.backgroundColor = bgColor;
+            document.querySelector('.ambient-glow').style.background = `radial-gradient(circle at 50% 20%, ${glowColor} 0%, transparent 60%)`;
+        }
+
+        // Quiz Option Handler
+        function checkAnswer(button, isCorrect, message) {
+            const parent = button.parentElement;
+            parent.querySelectorAll('.quiz-btn').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                if(btn === button) {
+                    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+                }
+            });
+            const feedbackId = parent.parentElement.querySelector('.quiz-feedback');
+            feedbackId.innerText = message;
+        }
+
+        updateSlide();
+    </script>
+</body>
+</html>
